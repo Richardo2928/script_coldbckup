@@ -42,6 +42,7 @@ import shutil
 
 from rich import print
 from rich.console import Console
+from rich.table import Table
 
 # ==================================================================
 # Constantes importantes
@@ -256,8 +257,12 @@ def generate_backup(sql_output: str, console: Console) -> None:
     
     # Mostramos las rutas de respaldo generadas
     console.print("[bold #49CA94]Rutas de respaldo generadas:[/bold #49CA94]")
+    dirs_table = Table(show_header=True, header_style="bold #49CA94")
+    dirs_table.add_column("Ruta original", style="italic #076678")
+    dirs_table.add_column("Ruta de respaldo", style="bold #fbf1c7")
     for src, dest in backup_dirs:
-        console.print(rf"[bold #d79921]\[[/bold #d79921][italic #ebdbb2]{src}[/italic #ebdbb2][bold #d79921]]->\[[/bold #d79921][bold #fbf1c7]{dest}[/bold #fbf1c7][bold #d79921]][/bold #d79921]")
+        dirs_table.add_row(src, dest)
+    console.print(dirs_table)
     
     # Validamos con el usuario que las rutas de respaldo generadas son correctas, para evitar errores al momento de copiar los archivos
     console.print("[bold #49CA94]Te parece que las rutas de respaldo generadas son correctas?[/bold #49CA94]")
