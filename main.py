@@ -3,7 +3,7 @@ Va que va.
 ¿Qué intento lograr con este script?
 1. Que el usuario, osea yo y tal vez aglún compañero(a), pueda elegir que
     hacer: generar un respaldo, restaurar un respaldo, RESPALDAR 1 O VARIOS ARCHIVOS Y RESTAURAR UNO O VARIOS ARCHIVOS.
-2. Si elige generar un respaldo, entonces el script debe:
+[DONE] 2. Si elige generar un respaldo, entonces el script debe:
     a. decirte que comando ejecutar según la práctica en la que estés,
     para obtener las rutas de los archivos de la base de datos específicos de la práctica.
     b. pedirle al usuario la salida del comando SQL.
@@ -37,6 +37,7 @@ NOTAS:
 
 import re
 import sys
+import os
 from pathlib import Path
 import shutil
 
@@ -247,6 +248,51 @@ def copy_files(backup_dirs: list) -> None:
         else:
             print(f"Archivo no encontrado: {src}")
             
+def scan_backup_dir(backup_root: str) -> list:
+    """
+    Escanea la ruta raíz de los respaldos y devuelve una lista de tuplas con las rutas originales y las rutas de respaldo.
+    La ruta original se reconstruye a partir de la ruta de respaldo,
+    extrayendo partes importantes: disco_origen, cdb_name, categoria y nombre_archivo
+    y lo reconstruye del siguiente modo: /{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{nombre_archivo}
+    o si está en fast_recovery_area: /{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{nombre_archivo}
+    """
+    
+    backup_dirs = list()
+    console = Console()
+    
+    with console.status("[bold {green_mint}]Escaneando directorio de respaldo...[/bold {green_mint}]", spinner="dots") as status:
+        
+        for root, dirs, files in os.walk(backup_root):
+            status.update(f"[bold {fg_secondary}]Escaneando {root}...[/bold {fg_secondary}]")
+            
+            for file in files:
+                status.update(f"[bold {fg_secondary}]Procesando {file}...[/bold {fg_secondary}]")
+                
+                # Construimos la ruta de respaldo completa
+                dest_path = Path(root) / file
+                src_path = ""
+                
+                parts = dest_path.parts
+                
+                # Extraemos el disco_origen, cdb_name, categoria y nombre_archivo de la ruta de respaldo
+                disco_origen = parts[2] # Ej: 'u01'
+                if 'fast_recovery_area' in parts:
+                    cdb_name = parts[4] # Ej: 'ORCL'
+                    categoria = parts[5] # Ej: 'datafile', 'controlfile', 'onlinelog'
+                    # Reconstruimos la ruta original
+                    src_path = f"/{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{file}"
+                else:
+                    cdb_name = parts[3] # Ej: 'ORCL'
+                    categoria = parts[4] # Ej: 'datafile', 'controlfile', 'onlinelog'
+                    # Reconstruimos la ruta original
+                    src_path = f"/{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{file}"
+                    
+                console.log(f"[bold {fg_secondary}]Ruta original reconstruida: {src_path}[/bold {fg_secondary}]")
+                
+                backup_dirs.append((src_path, str(dest_path)))
+        
+    return backup_dirs
+            
 # ==================================================================
 # Función para generar un respaldo completo
 # ==================================================================
@@ -255,15 +301,18 @@ def generate_backup(sql_output: str, console: Console) -> None:
     
     # Obtener las rutas de los archivos a partir de la salida del comando SQL
     raw_paths = get_raw_paths(sql_output)
-    console.print(f"[bold {green_medium}]Rutas originales extraídas del SQL:[/bold {green_medium}]")
+    
+    console.print(f"\n[bold {green_medium}]Rutas originales extraídas del SQL:[/bold {green_medium}]")
     for path in raw_paths:
         console.print(f"[bold {accent}]*[/bold {accent}][italic {fg_primary}]{path}[/italic {fg_primary}]")
+    
+    input(f"\n[bold {accent}]Presiona Enter para continuar...[/bold {accent}]")
     
     # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
     backup_dirs = generate_backup_dirs_tuple(raw_paths, DEFAULT_CDB_NAME)
     
     # Mostramos las rutas de respaldo generadas
-    console.print(f"[bold {green_medium}]Rutas de respaldo generadas:[/bold {green_medium}]")
+    console.print(f"\n[bold {green_medium}]Rutas de respaldo generadas:[/bold {green_medium}]")
     
     dirs_table = Table(
         show_header=True,
@@ -283,7 +332,7 @@ def generate_backup(sql_output: str, console: Console) -> None:
     console.print(dirs_table)
     
     # Validamos con el usuario que las rutas de respaldo generadas son correctas, para evitar errores al momento de copiar los archivos
-    console.print(f"[bold {green_medium}]Te parece que las rutas de respaldo generadas son correctas?[/bold {green_medium}]")
+    console.print(f"\n[bold {green_medium}]Te parece que las rutas de respaldo generadas son correctas?[/bold {green_medium}]")
     console.print(f"[bold {accent}](y/N)[/bold {accent}]")
     
     while True:
@@ -351,6 +400,53 @@ def generate_full_backup() -> None:
             
     generate_backup(sql_output, console)
     
+
+# ==================================================================
+# Función para restaurar un respaldo completo
+# ==================================================================
+def restore_backup(backup_dirs: list, console: Console) -> None:
+    """_summary_
+
+    Args:
+        backup_dirs (list): _description_
+        console (Console): _description_
+    """
+    
+    # Restauramos los archivos de respaldo a sus rutas originales
+    with console.status("[bold {green_mint}]Restaurando archivos...[/bold {green_mint}]", spinner="dots") as status:
+        # Iteramos sobre las tuplas de rutas originales y rutas de respaldo para copiar los archivos de respaldo a sus rutas originales
+        for i, (src, dest) in enumerate(backup_dirs, start=1):
+            status.update(f"[bold {fg_secondary}]Restaurando {i}/{len(backup_dirs)}[/bold {fg_secondary}]")
+            
+            src_path = Path(src)
+            dest_path = Path(dest)
+            
+            if src_path.exists():
+                shutil.copy2(src_path, dest_path)
+                console.log(f"[{green_mint}]Restaurado[/{green_mint}] {src} -> {dest}")
+            else:
+                console.log(f"[yellow]Que raro...No existe el archivo de respaldo[/yellow] {src}")
+                
+    console.log("[bold red]Restauración completa![/bold red]")
+    
+def restore_full_backup() -> None:
+    console = Console()
+    
+    backup_dirs = scan_backup_dir(DEFAULT_BACKUP_ROOT)
+    
+    console.print(f"\n[bold {green_medium}]Rutas de restauración creadas:[/bold {green_medium}]")
+    
+    for src, dest in backup_dirs:
+        console.print(rf"[bold {accent}]\[[/bold {accent}][italic {fg_primary}]{src}[/italic {fg_primary}][bold {accent}]]->\[[/bold {accent}][bold {fg_bright}]{dest}[/bold {fg_bright}][bold {accent}]][/bold {accent}]\n")
+    
+    choice = input(f"\n[bold {accent}]¿Deseas continuar? (y/N)[/bold {accent}] ").strip().lower()
+    
+    if choice == 'y':
+        restore_backup(backup_dirs, console)
+    else:
+        console.print(f"[bold {green_medium}]Restauración cancelada.[/bold {green_medium}]")
+        return
+        
 
 # ==================================================================
 # Función para pruebas
@@ -424,7 +520,7 @@ def main():
                 console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
                 console.print(f"[bold {green_medium}]===== Restaurar un respaldo completo =====[/bold {green_medium}]",justify="center")
                 console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
-                # Aquí iría la lógica para restaurar un respaldo completo
+                restore_full_backup()
             case '3':
                 console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
                 console.print(f"[bold {green_medium}]===== Generar un respaldo de uno o varios archivos específicos =====[/bold {green_medium}]",justify="center")
