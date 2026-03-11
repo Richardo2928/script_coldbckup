@@ -272,17 +272,49 @@ def generate_full_backup():
             console.print("[bold #49CA94]Rutas originales extraídas del SQL:[/bold #49CA94]")
             for path in raw_paths:
                 console.print(f"[bold #d79921]*[/bold #d79921][italic #076678]{path}[/italic #076678]")
-                
+            
             # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
             backup_dirs = generate_backup_dirs_tuple(raw_paths, DEFAULT_CDB_NAME)
+            
+            # Mostramos las rutas de respaldo generadas
             console.print("[bold #49CA94]Rutas de respaldo generadas:[/bold #49CA94]")
             for src, dest in backup_dirs:
                 console.print(rf"[bold #d79921]\[[/bold #d79921][italic #ebdbb2]{src}[/italic #ebdbb2][bold #d79921]]->\[[/bold #d79921][bold #fbf1c7]{dest}[/bold #fbf1c7][bold #d79921]][/bold #d79921]")
             
+            # Validamos con el usuario que las rutas de respaldo generadas son correctas, para evitar errores al momento de copiar los archivos
+            console.print("[bold #49CA94]Te parece que las rutas de respaldo generadas son correctas?[/bold #49CA94]")
+            console.print("[bold #d79921](y/N)[/bold #d79921]")
+            
+            while True:
+                console.print("[bold #d79921]>> [/bold #d79921]", end="")
+                choice = input().strip()
+                if choice.lower() == 'y':
+                    break
+                else:
+                    console.print("[bold #d79921]Opción no válida. Por favor, ingresa y o n.[/bold #d79921]")
+            
+            if choice == 'n':
+                console.print("[bold #49CA94]No pues está cañon lasjdflksjaldskjf.[/bold #49CA94]")
+                
+                return
+
             # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
-            console.print("[bold #49CA94]Creando directorios de respaldo y copiando archivos...[/bold #49CA94]")
-            create_backup_dirs(backup_dirs)
-            copy_files(backup_dirs)
+            with console.status("[bold green]Preparando respaldo...[/bold green]", spinner="dots") as status:
+                status.update("[bold cyan]Creando directorios de destino...[/bold cyan]")
+                create_backup_dirs(backup_dirs)
+
+                status.update("[bold cyan]Copiando archivos...[/bold cyan]")
+                for i, (src, dest) in enumerate(backup_dirs, start=1):
+                    status.update(f"[bold cyan]Copiando {i}/{len(backup_dirs)}[/bold cyan]")
+                    src_path = Path(src)
+                    dest_path = Path(dest)
+                    if src_path.exists():
+                        shutil.copy2(src_path, dest_path)
+                        console.log(f"[green]Copiado[/green] {src} -> {dest}")
+                    else:
+                        console.log(f"[yellow]No existe[/yellow] {src}")
+
+            console.log("[bold red]Done![/bold red]")
         case '2':
             console.print("[bold #49CA94]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold #49CA94]")
             console.print(f"[italic #076678]{COMANDO_PRACTICA_10}[/italic #076678]")
