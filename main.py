@@ -249,6 +249,7 @@ def generate_full_backup():
     console.print("[bold #d79921]1.[/bold #d79921] Práctica 7 (respaldo en frío)")
     console.print("[bold #d79921]2.[/bold #d79921] Práctica 10 (respaldo en caliente. Incluye archive logs y redo logs)")
     
+    # Validar la entrada del usuario: qué práctica está realizando
     while True:
         console.print("[bold #d79921]>> [/bold #d79921]", end="")
         choice = input().strip()
@@ -257,13 +258,19 @@ def generate_full_backup():
         else:
             console.print("[bold #d79921]Opción no válida. Por favor, ingresa 1 o 2.[/bold #d79921]")
     
+    # Procesar la elección del usuario
     match choice:
         case '1':
             console.print("[bold #49CA94]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold #49CA94]")
             console.print(f"[italic #076678]{COMANDO_PRACTICA_7}[/italic #076678]")
             console.print("[bold #49CA94]Luego, copia y pega la salida del comando SQL aquí:[/bold #49CA94]")
             sql_output = sys.stdin.read()
+            # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
             backup_dirs = generate_backup_dirs_tuple(get_raw_paths(sql_output), DEFAULT_CDB_NAME)
+            console.print("[bold #49CA94]Rutas de respaldo generadas:[/bold #49CA94]")
+            for src, dest in backup_dirs:
+                console.print(rf"[bold #d79921]\[[/bold #d79921][italic #ebdbb2]{src}[/italic #ebdbb2][bold #d79921]]->\[[/bold #d79921][bold #fbf1c7]{dest}[/bold #fbf1c7][bold #d79921]][/bold #d79921]")
+            # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
             create_backup_dirs(backup_dirs)
             copy_files(backup_dirs)
         case '2':
@@ -271,7 +278,12 @@ def generate_full_backup():
             console.print(f"[italic #076678]{COMANDO_PRACTICA_10}[/italic #076678]")
             console.print("[bold #49CA94]Luego, copia y pega la salida del comando SQL aquí:[/bold #49CA94]")
             sql_output = sys.stdin.read()
+            # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
             backup_dirs = generate_backup_dirs_tuple(get_raw_paths(sql_output), DEFAULT_CDB_NAME)
+            console.print("[bold #49CA94]Rutas de respaldo generadas:[/bold #49CA94]")
+            for src, dest in backup_dirs:
+                console.print(rf"[bold #d79921]\[[/bold #d79921][italic #ebdbb2]{src}[/italic #ebdbb2][bold #d79921]]->\[[/bold #d79921][bold #fbf1c7]{dest}[/bold #fbf1c7][bold #d79921]][/bold #d79921]")
+            # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
             create_backup_dirs(backup_dirs)
             copy_files(backup_dirs)
     
