@@ -438,9 +438,9 @@ def main():
             case '0':
                 break
     
-        console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
-        console.print(f"[bold {green_medium}]===== Bye bye :3 =====[/bold {green_medium}]",justify="center")
-        console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
+    console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
+    console.print(f"[bold {green_medium}]===== Bye bye :3 =====[/bold {green_medium}]",justify="center")
+    console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
 
 if __name__ == "__main__":
     main()
