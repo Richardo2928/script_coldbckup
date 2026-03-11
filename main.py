@@ -300,17 +300,17 @@ def generate_backup(sql_output: str, console: Console) -> None:
 
     # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
     with console.status("[bold {green_mint}]Preparando respaldo...[/bold {green_mint}]", spinner="dots") as status:
-        status.update("[bold cyan]Creando directorios de destino...[/bold cyan]")
+        status.update("[bold {fg_secondary}]Creando directorios de destino...[/bold {fg_secondary}]")
         create_backup_dirs(backup_dirs)
 
-        status.update("[bold cyan]Copiando archivos...[/bold cyan]")
+        status.update(f"[bold {fg_secondary}]Copiando archivos...[/bold {fg_secondary}]")
         for i, (src, dest) in enumerate(backup_dirs, start=1):
-            status.update(f"[bold cyan]Copiando {i}/{len(backup_dirs)}[/bold cyan]")
+            status.update(f"[bold {fg_secondary}]Copiando {i}/{len(backup_dirs)}[/bold {fg_secondary}]")
             src_path = Path(src)
             dest_path = Path(dest)
             if src_path.exists():
                 shutil.copy2(src_path, dest_path)
-                console.log(f"[{green_mint}]]Copiado[/{green_mint}] {src} -> {dest}")
+                console.log(f"[{green_mint}]Copiado[/{green_mint}] {src} -> {dest}")
             else:
                 console.log(f"[yellow]No existe[/yellow] {src}")
 
