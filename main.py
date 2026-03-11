@@ -11,17 +11,17 @@ Va que va.
     d. generar las rutas de respaldo siguiendo la estructura dada.
     e. crear los directorios de destino para los archivos de respaldo.
     f. copiar los archivos a las rutas de respaldo.
-3. Si elige restaurar un respaldo, entonces el script debe:
-    a. pedirle al usuario que ingrese una ruta "madre" donde se encuentran los archivos de respaldo.
-    b. también pedirle al usuario que ingrese el nombre del cdb, para poder construir las rutas originales correctamente.
-    c. buscar dentro de esa ruta "madre" los archivos de respaldo y sus rutas originales:
+[DONE] 3. Si elige restaurar un respaldo, entonces el script debe:
+    [TODO] a. pedirle al usuario que ingrese una ruta "madre" donde se encuentran los archivos de respaldo.
+    [TODO] b. también pedirle al usuario que ingrese el nombre del cdb, para poder construir las rutas originales correctamente.
+    [DONE] c. buscar dentro de esa ruta "madre" los archivos de respaldo y sus rutas originales:
         - las rutas a los archivos son descriptivas, por ejemplo: /u03/u01/ORCL/datafile/o1_mf_system_nrqv4ytd_.dbf
         - la ruta original se encuentra dentro de la ruta de respaldo, por ejemplo:
         /u01/app/oracle/oradata/ORCL/datafile/o1_mf_system_nrqv4ytd_.dbf
         - es decir, se construye la ruta original a partir de la ruta de respaldo,
         extrayendo partes importantes: disco_origen, cdb_name, categoria y nombre_archivo y
         lo reconstruye del siguiente modo: /{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{nombre_archivo}
-    d. copiar los archivos de respaldo a sus rutas originales.
+    [DONE] d. copiar los archivos de respaldo a sus rutas originales.
     
 NOTAS:
 - las rutas originales contemplan 3 tipos de rutas:
@@ -594,8 +594,8 @@ def main():
         console.print(f"[bold {fg_primary}]Qué deseas hacer?[/bold {fg_primary}]")
         console.print(f"[bold {accent}]1.[/bold {accent}] Generar un respaldo")
         console.print(f"[bold {accent}]2.[/bold {accent}] Restaurar un respaldo")
-        console.print(f"[bold {accent}]3.[/bold {accent}] Generar un respaldo de uno o varios archivos específicos")
-        console.print(f"[bold {accent}]4.[/bold {accent}] Restaurar uno o varios archivos específicos desde un respaldo")
+        console.print(f"[bold {accent}]3.[/bold {accent}] Generar un respaldo de uno o varios archivos específicos [bold {accent}]--- AÚN EN CONSTRUCCIÓN")
+        console.print(f"[bold {accent}]4.[/bold {accent}] Restaurar uno o varios archivos específicos desde un respaldo [bold {accent}]--- AÚN EN CONSTRUCCIÓN")
         console.print(f"[bold {accent}]0.[/bold {accent}] Salir")
         
         # Validar la entrada del usuario
