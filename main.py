@@ -95,10 +95,10 @@ SELECT name FROM v$archived_log;
 """
 
 TEST_STRING = """
-SQL> -- Elimina los saltos de p�gina
+SQL> -- Elimina los saltos de pagina
 SET PAGESIZE 0
 
--- Ajusta el ancho de l�nea para evitar cortes
+-- Ajusta el ancho de linea para evitar cortes
 SET LINESIZE 1000
 
 -- Oculta el mensaje de "filas seleccionadas"
@@ -266,11 +266,19 @@ def generate_full_backup():
             console.print("[bold #49CA94]Luego, copia y pega la salida del comando SQL aquí:[/bold #49CA94]")
             # sql_output = sys.stdin.read()
             sql_output = input()
+            
+            # Obtener las rutas de los archivos a partir de la salida del comando SQL
+            raw_paths = get_raw_paths(sql_output)
+            console.print("[bold #49CA94]Rutas originales extraídas del SQL:[/bold #49CA94]")
+            for path in raw_paths:
+                console.print(f"[bold #d79921]*[/bold #d79921][italic #076678]{path}[/italic #076678]")
+                
             # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
-            backup_dirs = generate_backup_dirs_tuple(get_raw_paths(sql_output), DEFAULT_CDB_NAME)
+            backup_dirs = generate_backup_dirs_tuple(raw_paths, DEFAULT_CDB_NAME)
             console.print("[bold #49CA94]Rutas de respaldo generadas:[/bold #49CA94]")
             for src, dest in backup_dirs:
                 console.print(rf"[bold #d79921]\[[/bold #d79921][italic #ebdbb2]{src}[/italic #ebdbb2][bold #d79921]]->\[[/bold #d79921][bold #fbf1c7]{dest}[/bold #fbf1c7][bold #d79921]][/bold #d79921]")
+            
             # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
             create_backup_dirs(backup_dirs)
             copy_files(backup_dirs)
@@ -279,11 +287,19 @@ def generate_full_backup():
             console.print(f"[italic #076678]{COMANDO_PRACTICA_10}[/italic #076678]")
             console.print("[bold #49CA94]Luego, copia y pega la salida del comando SQL aquí:[/bold #49CA94]")
             sql_output = sys.stdin.read()
+            
+            # Obtener las rutas de los archivos a partir de la salida del comando SQL
+            raw_paths = get_raw_paths(sql_output)
+            console.print("[bold #49CA94]Rutas originales extraídas del SQL:[/bold #49CA94]")
+            for path in raw_paths:
+                console.print(f"[bold #d79921]*[/bold #d79921][italic #076678]{path}[/italic #076678]")
+            
             # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
-            backup_dirs = generate_backup_dirs_tuple(get_raw_paths(sql_output), DEFAULT_CDB_NAME)
+            backup_dirs = generate_backup_dirs_tuple(raw_paths, DEFAULT_CDB_NAME)
             console.print("[bold #49CA94]Rutas de respaldo generadas:[/bold #49CA94]")
             for src, dest in backup_dirs:
                 console.print(rf"[bold #d79921]\[[/bold #d79921][italic #ebdbb2]{src}[/italic #ebdbb2][bold #d79921]]->\[[/bold #d79921][bold #fbf1c7]{dest}[/bold #fbf1c7][bold #d79921]][/bold #d79921]")
+            
             # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
             create_backup_dirs(backup_dirs)
             copy_files(backup_dirs)
