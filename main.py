@@ -270,7 +270,7 @@ def register_full_backup(console: Console, practice_label: str, total_files: int
     with archive_path.open("a", encoding="utf-8") as archive_file:
         archive_file.write(log_line)
 
-    console.print(f"[{green_mint}]===== Registro actualizado: [/{green_mint}] {archive_path} [{green_mint}=====[/{green_mint}]]", justify="center")
+    console.print(f"[{green_mint}]===== Registro actualizado: [/{green_mint}] {archive_path} [{green_mint}]=====[/{green_mint}]]", justify="center")
     console.print(f"{log_line.strip()}", justify="center")
     console.print(f"[{green_mint}]===============================[/{green_mint}]", justify="center")
 
