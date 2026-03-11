@@ -264,7 +264,8 @@ def generate_full_backup():
             console.print("[bold #49CA94]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold #49CA94]")
             console.print(f"[italic #076678]{COMANDO_PRACTICA_7}[/italic #076678]")
             console.print("[bold #49CA94]Luego, copia y pega la salida del comando SQL aquí:[/bold #49CA94]")
-            sql_output = sys.stdin.read()
+            # sql_output = sys.stdin.read()
+            sql_output = input()
             # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
             backup_dirs = generate_backup_dirs_tuple(get_raw_paths(sql_output), DEFAULT_CDB_NAME)
             console.print("[bold #49CA94]Rutas de respaldo generadas:[/bold #49CA94]")
