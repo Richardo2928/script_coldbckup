@@ -380,6 +380,10 @@ def main():
     console.height = console.height
     separator = "=" * console_width
     
+    console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
+    console.print(f"[bold {green_medium}]===== Respaldo en frío :3 =====[/bold {green_medium}]",justify="center")
+    console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
+    
     while True:
         console.print(f"[bold {fg_primary}]Qué deseas hacer?[/bold {fg_primary}]")
         console.print(f"[bold {accent}]1.[/bold {accent}] Generar un respaldo")
@@ -420,10 +424,11 @@ def main():
                 console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
                 # Aquí iría la lógica para restaurar archivos específicos desde un respaldo
             case '0':
-                console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
-                console.print(f"[bold {green_medium}]===== Bye bye :3 =====[/bold {green_medium}]",justify="center")
-                console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
                 break
+    
+        console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
+        console.print(f"[bold {green_medium}]===== Bye bye :3 =====[/bold {green_medium}]",justify="center")
+        console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
 
 if __name__ == "__main__":
     main()
