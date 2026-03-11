@@ -280,6 +280,7 @@ def generate_full_backup():
                 console.print(rf"[bold #d79921]\[[/bold #d79921][italic #ebdbb2]{src}[/italic #ebdbb2][bold #d79921]]->\[[/bold #d79921][bold #fbf1c7]{dest}[/bold #fbf1c7][bold #d79921]][/bold #d79921]")
             
             # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
+            console.print("[bold #49CA94]Creando directorios de respaldo y copiando archivos...[/bold #49CA94]")
             create_backup_dirs(backup_dirs)
             copy_files(backup_dirs)
         case '2':
