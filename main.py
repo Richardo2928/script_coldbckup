@@ -493,30 +493,31 @@ def scan_backup_dir(backup_root: str) -> list:
             status.update(f"[bold {fg_secondary}]Escaneando {root}...[/bold {fg_secondary}]")
             
             for file in files:
-                status.update(f"[bold {fg_secondary}]Procesando {file}...[/bold {fg_secondary}]")
-                
-                # Construimos la ruta de respaldo completa
-                dest_path = Path(root) / file
-                src_path = ""
-                
-                parts = dest_path.parts
-                
-                # Extraemos el disco_origen, cdb_name, categoria y nombre_archivo de la ruta de respaldo
-                disco_origen = parts[2] # Ej: 'u01'
-                if 'fast_recovery_area' in parts:
-                    cdb_name = parts[4] # Ej: 'ORCL'
-                    categoria = parts[5] # Ej: 'datafile', 'controlfile', 'onlinelog'
-                    # Reconstruimos la ruta original
-                    src_path = f"/{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{file}"
-                else:
-                    cdb_name = parts[3] # Ej: 'ORCL'
-                    categoria = parts[4] # Ej: 'datafile', 'controlfile', 'onlinelog'
-                    # Reconstruimos la ruta original
-                    src_path = f"/{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{file}"
+                if file != BACKUP_ARCHIVE_FILENAME:
+                    status.update(f"[bold {fg_secondary}]Procesando {file}...[/bold {fg_secondary}]")
                     
-                console.log(f"[bold {fg_secondary}]Ruta original reconstruida: {src_path}[/bold {fg_secondary}]")
-                
-                backup_dirs.append((src_path, str(dest_path)))
+                    # Construimos la ruta de respaldo completa
+                    dest_path = Path(root) / file
+                    src_path = ""
+                    
+                    parts = dest_path.parts
+                    
+                    # Extraemos el disco_origen, cdb_name, categoria y nombre_archivo de la ruta de respaldo
+                    disco_origen = parts[2] # Ej: 'u01'
+                    if 'fast_recovery_area' in parts:
+                        cdb_name = parts[4] # Ej: 'ORCL'
+                        categoria = parts[5] # Ej: 'datafile', 'controlfile', 'onlinelog'
+                        # Reconstruimos la ruta original
+                        src_path = f"/{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{file}"
+                    else:
+                        cdb_name = parts[3] # Ej: 'ORCL'
+                        categoria = parts[4] # Ej: 'datafile', 'controlfile', 'onlinelog'
+                        # Reconstruimos la ruta original
+                        src_path = f"/{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{file}"
+                        
+                    console.log(f"[bold {fg_secondary}]Ruta original reconstruida: {src_path}[/bold {fg_secondary}]")
+                    
+                    backup_dirs.append((src_path, str(dest_path)))
         
     return backup_dirs
 
