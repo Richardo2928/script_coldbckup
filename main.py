@@ -40,6 +40,7 @@ import sys
 import os
 from pathlib import Path
 import shutil
+from datetime import datetime
 
 from rich import print
 from rich.console import Console
@@ -144,6 +145,7 @@ SELECT member FROM v$logfile;SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> S
 
 DEFAULT_CDB_NAME = "ORCL"
 DEFAULT_BACKUP_ROOT = "/u03"
+BACKUP_ARCHIVE_FILENAME = "backups_archives.txt"
 
 green_medium = "#49CA94"
 green_mint = "#A4ECA8"
@@ -248,12 +250,47 @@ def copy_files(backup_dirs: list) -> None:
         else:
             print(f"Archivo no encontrado: {src}")
 
+
+def get_backup_archive_path() -> Path:
+    """Devuelve la ruta del archivo de control de respaldos completos."""
+
+    return Path(DEFAULT_BACKUP_ROOT) / BACKUP_ARCHIVE_FILENAME
+
+
+def register_full_backup(console: Console, practice_label: str, total_files: int) -> None:
+    """Registra un respaldo completo exitoso en backups_archives.txt."""
+
+    archive_path = get_backup_archive_path()
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    log_line = f"full_backup|{timestamp}|practice={practice_label}|files={total_files}\n"
+
+    archive_path.parent.mkdir(parents=True, exist_ok=True)
+    with archive_path.open("a", encoding="utf-8") as archive_file:
+        archive_file.write(log_line)
+
+    console.log(f"[{green_mint}]Registro actualizado[/{green_mint}] {archive_path}")
+
+
+def has_full_backup_record() -> bool:
+    """Verifica si existe al menos un registro de respaldo completo exitoso."""
+
+    archive_path = get_backup_archive_path()
+    if not archive_path.exists():
+        return False
+
+    with archive_path.open("r", encoding="utf-8") as archive_file:
+        for line in archive_file:
+            if line.strip().startswith("full_backup|"):
+                return True
+
+    return False
+
             
 # ==================================================================
 # Función para generar un respaldo completo
 # ==================================================================
 # Esta función se encarga de generar un respaldo completo, específicamente para la práctica 7
-def generate_backup(sql_output: str, console: Console) -> None:
+def generate_backup(sql_output: str, console: Console, practice_label: str) -> None:
     
     # Obtener las rutas de los archivos a partir de la salida del comando SQL
     raw_paths = get_raw_paths(sql_output)
@@ -285,6 +322,7 @@ def generate_backup(sql_output: str, console: Console) -> None:
     
     for src, dest in backup_dirs:
         dirs_table.add_row(src, dest)
+        
     console.print(dirs_table)
     
     # Validamos con el usuario que las rutas de respaldo generadas son correctas, para evitar errores al momento de copiar los archivos
@@ -294,18 +332,22 @@ def generate_backup(sql_output: str, console: Console) -> None:
     while True:
         console.print(f"[bold {accent}]>> [/bold {accent}]", end="")
         choice = str(input().strip()).lower()
-        if choice == 'y':
+        if choice in ["y", "n", ""]:
             break
         else:
             console.print(f"[bold {accent}]Opción no válida. Por favor, ingresa y o n.[/bold {accent}]")
     
-    if choice == 'n':
+    if choice != 'y':
         console.print(f"[bold {green_medium}]No pues está cañon lasjdflksjaldskjf.[/bold {green_medium}]")
         return
 
     # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
-    with console.status("[bold {green_mint}]Preparando respaldo...[/bold {green_mint}]", spinner="dots") as status:
-        status.update("[bold {fg_secondary}]Creando directorios de destino...[/bold {fg_secondary}]")
+    copied_count = 0
+    missing_count = 0
+    error_count = 0
+
+    with console.status(f"[bold {green_mint}]Preparando respaldo...[/bold {green_mint}]", spinner="dots") as status:
+        status.update(f"[bold {fg_secondary}]Creando directorios de destino...[/bold {fg_secondary}]")
         create_backup_dirs(backup_dirs)
 
         status.update(f"[bold {fg_secondary}]Copiando archivos...[/bold {fg_secondary}]")
@@ -314,12 +356,26 @@ def generate_backup(sql_output: str, console: Console) -> None:
             src_path = Path(src)
             dest_path = Path(dest)
             if src_path.exists():
-                shutil.copy2(src_path, dest_path)
-                console.log(f"[{green_mint}]Copiado[/{green_mint}] {src} -> {dest}")
+                try:
+                    shutil.copy2(src_path, dest_path)
+                    copied_count += 1
+                    console.log(f"[{green_mint}]Copiado[/{green_mint}] {src} -> {dest}")
+                except Exception as e:
+                    error_count += 1
+                    console.log(f"[red]Error al copiar[/red] {src} -> {dest}: {e}")
             else:
+                missing_count += 1
                 console.log(f"[yellow]No existe[/yellow] {src}")
 
-    console.log("[bold red]Done![/bold red]")
+    if copied_count == len(backup_dirs) and error_count == 0 and missing_count == 0:
+        register_full_backup(console, practice_label, copied_count)
+        console.log("[bold red]Done![/bold red]")
+    else:
+        console.log(
+            f"[bold yellow]Respaldo incompleto:[/bold yellow] copiados={copied_count}, "
+            f"faltantes={missing_count}, errores={error_count}."
+        )
+        console.log("[bold yellow]No se registró como full backup exitoso.[/bold yellow]")
 
 # Generar un respaldo completo, ya sea de la práctica 7 o de la práctica 10
 def generate_full_backup() -> None:
@@ -340,6 +396,7 @@ def generate_full_backup() -> None:
     
     # Procesar la elección del usuario
     sql_output = ""
+    practice_label = ""
     match choice:
         case '1':
             console.print(f"[bold {green_medium}]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold {green_medium}]")
@@ -347,14 +404,16 @@ def generate_full_backup() -> None:
             console.print(f"[bold {green_medium}]Luego, copia y pega la salida del comando SQL aquí:[/bold {green_medium}]")
             console.print(f"[bold {accent}]Presiona Ctrl+D para finalizar la entrada:[/bold {accent}]")
             sql_output = sys.stdin.read()
+            practice_label = "practice_7"
         case '2':
             console.print(f"[bold {green_medium}]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold {green_medium}]")
             console.print(f"[italic {fg_secondary}]{COMANDO_PRACTICA_10}[/italic {fg_secondary}]")
             console.print(f"[bold {green_medium}]Luego, copia y pega la salida del comando SQL aquí:[/bold {green_medium}]")
             console.print(f"[bold {accent}]Presiona Ctrl+D para finalizar la entrada:[/bold {accent}]")
             sql_output = sys.stdin.read()
-            
-    generate_backup(sql_output, console)
+            practice_label = "practice_10"
+
+    generate_backup(sql_output, console, practice_label)
     
 
 # ==================================================================
@@ -387,6 +446,14 @@ def restore_backup(backup_dirs: list, console: Console) -> None:
     
 def restore_full_backup() -> None:
     console = Console()
+
+    if not has_full_backup_record():
+        archive_path = get_backup_archive_path()
+        console.print(
+            f"[bold red]No hay registro de full backup exitoso en {archive_path}. "
+            "Se cancela la restauracion para evitar inconsistencias.[/bold red]"
+        )
+        return
     
     backup_dirs = scan_backup_dir(DEFAULT_BACKUP_ROOT)
     
