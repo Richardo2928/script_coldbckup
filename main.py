@@ -535,7 +535,10 @@ def scan_backup_dir(backup_root: str) -> list:
                     if 'fast_recovery_area' in parts:
                         dest_path = f"/{disco_origen}/app/oracle/fast_recovery_area/{DEFAULT_CDB_NAME}/{categoria}/{nombre_archivo}"
                     else:
-                        dest_path = f"/{disco_origen}/app/oracle/oradata/{DEFAULT_CDB_NAME}/{categoria}/{nombre_archivo}"
+                        if disco_origen == "u01":
+                            dest_path = f"/{disco_origen}/app/oracle/oradata/{DEFAULT_CDB_NAME}/{categoria}/{nombre_archivo}"
+                        else:
+                            dest_path = f"/{disco_origen}/{DEFAULT_CDB_NAME}/{categoria}/{nombre_archivo}"
                         
                     console.log(f"[{fg_secondary}]Ruta original reconstruida:[/{fg_secondary}] [bold]{dest_path}[/bold]")
                     
