@@ -144,6 +144,12 @@ SELECT member FROM v$logfile;SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> SQL> S
 DEFAULT_CDB_NAME = "ORCL"
 DEFAULT_BACKUP_ROOT = "/u03"
 
+green_medium = "#49CA94"
+green_mint = "#A4ECA8"
+fg_primary = "#ebdbb2"
+fg_secondary = "#076678"
+accent = "#d79921"
+
 # ==================================================================
 # Utilidades del script
 # ==================================================================
@@ -248,40 +254,40 @@ def generate_backup(sql_output: str, console: Console) -> None:
     
     # Obtener las rutas de los archivos a partir de la salida del comando SQL
     raw_paths = get_raw_paths(sql_output)
-    console.print("[bold #49CA94]Rutas originales extraídas del SQL:[/bold #49CA94]")
+    console.print(f"[bold {green_medium}]Rutas originales extraídas del SQL:[/bold {green_medium}]")
     for path in raw_paths:
-        console.print(f"[bold #d79921]*[/bold #d79921][italic #076678]{path}[/italic #076678]")
+        console.print(f"[bold {accent}]*[/bold {accent}][italic {fg_primary}]{path}[/italic {fg_primary}]")
     
     # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
     backup_dirs = generate_backup_dirs_tuple(raw_paths, DEFAULT_CDB_NAME)
     
     # Mostramos las rutas de respaldo generadas
-    console.print("[bold #49CA94]Rutas de respaldo generadas:[/bold #49CA94]")
+    console.print(f"[bold {green_medium}]Rutas de respaldo generadas:[/bold {green_medium}]")
     dirs_table = Table(show_header=True, header_style="bold #49CA94")
-    dirs_table.add_column("Ruta original", style="italic #076678")
+    dirs_table.add_column("Ruta original", style="italic {fg_secondary}")
     dirs_table.add_column("Ruta de respaldo", style="bold #fbf1c7")
     for src, dest in backup_dirs:
         dirs_table.add_row(src, dest)
     console.print(dirs_table)
     
     # Validamos con el usuario que las rutas de respaldo generadas son correctas, para evitar errores al momento de copiar los archivos
-    console.print("[bold #49CA94]Te parece que las rutas de respaldo generadas son correctas?[/bold #49CA94]")
-    console.print("[bold #d79921](y/N)[/bold #d79921]")
+    console.print(f"[bold {green_medium}]Te parece que las rutas de respaldo generadas son correctas?[/bold {green_medium}]")
+    console.print(f"[bold {accent}](y/N)[/bold {accent}]")
     
     while True:
-        console.print("[bold #d79921]>> [/bold #d79921]", end="")
+        console.print(f"[bold {accent}]>> [/bold {accent}]", end="")
         choice = str(input().strip()).lower()
         if choice == 'y':
             break
         else:
-            console.print("[bold #d79921]Opción no válida. Por favor, ingresa y o n.[/bold #d79921]")
+            console.print(f"[bold {accent}]Opción no válida. Por favor, ingresa y o n.[/bold {accent}]")
     
     if choice == 'n':
-        console.print("[bold #49CA94]No pues está cañon lasjdflksjaldskjf.[/bold #49CA94]")
+        console.print(f"[bold {green_medium}]No pues está cañon lasjdflksjaldskjf.[/bold {green_medium}]")
         return
 
     # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
-    with console.status("[bold green]Preparando respaldo...[/bold green]", spinner="dots") as status:
+    with console.status("[bold {green_mint}]Preparando respaldo...[/bold {green_mint}]", spinner="dots") as status:
         status.update("[bold cyan]Creando directorios de destino...[/bold cyan]")
         create_backup_dirs(backup_dirs)
 
@@ -292,7 +298,7 @@ def generate_backup(sql_output: str, console: Console) -> None:
             dest_path = Path(dest)
             if src_path.exists():
                 shutil.copy2(src_path, dest_path)
-                console.log(f"[green]Copiado[/green] {src} -> {dest}")
+                console.log(f"[{green_mint}]]Copiado[/{green_mint}] {src} -> {dest}")
             else:
                 console.log(f"[yellow]No existe[/yellow] {src}")
 
@@ -302,33 +308,33 @@ def generate_backup(sql_output: str, console: Console) -> None:
 def generate_full_backup() -> None:
     console = Console()
     
-    console.print("[bold #49CA94]Qué practica estás realizando?[/bold #49CA94]")
-    console.print("[bold #d79921]1.[/bold #d79921] Práctica 7 (respaldo en frío)")
-    console.print("[bold #d79921]2.[/bold #d79921] Práctica 10 (respaldo en caliente. Incluye archive logs y redo logs)")
+    console.print(f"[bold {green_medium}]Qué practica estás realizando?[/bold {green_medium}]")
+    console.print(f"[bold {accent}]1.[/bold {accent}] Práctica 7 (respaldo en frío)")
+    console.print(f"[bold {accent}]2.[/bold {accent}] Práctica 10 (respaldo en caliente. Incluye archive logs y redo logs)")
     
     # Validar la entrada del usuario: qué práctica está realizando
     while True:
-        console.print("[bold #d79921]>> [/bold #d79921]", end="")
+        console.print(f"[bold {accent}]>> [/bold {accent}]", end="")
         choice = input().strip()
         if choice in ['1', '2']:
             break
         else:
-            console.print("[bold #d79921]Opción no válida. Por favor, ingresa 1 o 2.[/bold #d79921]")
+            console.print(f"[bold {accent}]Opción no válida. Por favor, ingresa 1 o 2.[/bold {accent}]")
     
     # Procesar la elección del usuario
     sql_output = ""
     match choice:
         case '1':
-            console.print("[bold #49CA94]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold #49CA94]")
-            console.print(f"[italic #076678]{COMANDO_PRACTICA_7}[/italic #076678]")
-            console.print("[bold #49CA94]Luego, copia y pega la salida del comando SQL aquí:[/bold #49CA94]")
-            console.print("[bold #cc241d]Presiona Ctrl+D para finalizar la entrada:[/bold #cc241d]")
+            console.print(f"[bold {green_medium}]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold {green_medium}]")
+            console.print(f"[italic {fg_secondary}]{COMANDO_PRACTICA_7}[/italic {fg_secondary}]")
+            console.print(f"[bold {green_medium}]Luego, copia y pega la salida del comando SQL aquí:[/bold {green_medium}]")
+            console.print(f"[bold {accent}]Presiona Ctrl+D para finalizar la entrada:[/bold {accent}]")
             sql_output = sys.stdin.read()
         case '2':
-            console.print("[bold #49CA94]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold #49CA94]")
-            console.print(f"[italic #076678]{COMANDO_PRACTICA_10}[/italic #076678]")
-            console.print("[bold #49CA94]Luego, copia y pega la salida del comando SQL aquí:[/bold #49CA94]")
-            console.print("[bold #cc241d]Presiona Ctrl+D para finalizar la entrada:[/bold #cc241d]")
+            console.print(f"[bold {green_medium}]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold {green_medium}]")
+            console.print(f"[italic {fg_secondary}]{COMANDO_PRACTICA_10}[/italic {fg_secondary}]")
+            console.print(f"[bold {green_medium}]Luego, copia y pega la salida del comando SQL aquí:[/bold {green_medium}]")
+            console.print(f"[bold {accent}]Presiona Ctrl+D para finalizar la entrada:[/bold {accent}]")
             sql_output = sys.stdin.read()
             
     generate_backup(sql_output, console)
@@ -348,21 +354,21 @@ def test_script():
     
     ####################################################
     # Mostrar resultados de la función get_raw_paths
-    console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
-    console.print(f"[bold #49CA94]Rutas originales:[/bold #49CA94]")
+    console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
+    console.print(f"[bold {green_medium}]Rutas originales:[/bold {green_medium}]")
     
     dirs = get_raw_paths(TEST_STRING)
     for directory in dirs:
-        console.print(f"[bold #d79921]*[/bold #d79921][italic #076678]{directory}[/italic #076678]")
+        console.print(f"[bold {accent}]*[/bold {accent}][italic {fg_secondary}]{directory}[/italic {fg_secondary}]")
 
     ####################################################
     # Mostrar resultados de la función generate_backup_dirs_tuple
-    console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
-    console.print(f"[bold #49CA94]Rutas de respaldo:[/bold #49CA94]")
+    console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
+    console.print(f"[bold {green_medium}]Rutas de respaldo:[/bold {green_medium}]")
     
     backup_dirs = generate_backup_dirs_tuple(get_raw_paths(TEST_STRING), "ORCL")
     for src, dest in backup_dirs:
-        console.print(rf"[bold #d79921]\[[/bold #d79921][italic #ebdbb2]{src}[/italic #ebdbb2][bold #d79921]]->\[[/bold #d79921][bold #fbf1c7]{dest}[/bold #fbf1c7][bold #d79921]][/bold #d79921]")
+        console.print(rf"[bold {accent}]\[[/bold {accent}][italic {fg_primary}]{src}[/italic {fg_primary}][bold {accent}]]->\[[/bold {accent}][bold #fbf1c7]{dest}[/bold #fbf1c7][bold {accent}]][/bold {accent}]")
 
 
 # ==================================================================
@@ -375,48 +381,48 @@ def main():
     separator = "=" * console_width
     
     while True:
-        console.print("[bold #ebdbb2]Qué deseas hacer?[/bold #ebdbb2]")
-        console.print("[bold #d79921]1.[/bold #d79921] Generar un respaldo")
-        console.print("[bold #d79921]2.[/bold #d79921] Restaurar un respaldo")
-        console.print("[bold #d79921]3.[/bold #d79921] Generar un respaldo de uno o varios archivos específicos")
-        console.print("[bold #d79921]4.[/bold #d79921] Restaurar uno o varios archivos específicos desde un respaldo")
-        console.print("[bold #d79921]0.[/bold #d79921] Salir")
+        console.print(f"[bold {fg_primary}]Qué deseas hacer?[/bold {fg_primary}]")
+        console.print(f"[bold {accent}]1.[/bold {accent}] Generar un respaldo")
+        console.print(f"[bold {accent}]2.[/bold {accent}] Restaurar un respaldo")
+        console.print(f"[bold {accent}]3.[/bold {accent}] Generar un respaldo de uno o varios archivos específicos")
+        console.print(f"[bold {accent}]4.[/bold {accent}] Restaurar uno o varios archivos específicos desde un respaldo")
+        console.print(f"[bold {accent}]0.[/bold {accent}] Salir")
         
         # Validar la entrada del usuario
         while True:
-            console.print("[bold #d79921]>> [/bold #d79921]", end="")
+            console.print(f"[bold {accent}]>> [/bold {accent}]", end="")
             choice = input().strip()
             if choice in ['1', '2', '3', '4', '0']:
                 break
             else:
-                console.print("[bold #d79921]Opción no válida. Por favor, ingresa 1, 2, 3, 4 o 0.[/bold #d79921]")
+                console.print(f"[bold {accent}]Opción no válida. Por favor, ingresa 1, 2, 3, 4 o 0.[/bold {accent}]")
         
         # Procesar la elección del usuario
         match choice:
             case '1':
-                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
-                console.print("[bold #49CA94]===== Generar un respaldo completo =====[/bold #49CA94]",justify="center")
-                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
+                console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
+                console.print(f"[bold {green_medium}]===== Generar un respaldo completo =====[/bold {green_medium}]",justify="center")
+                console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
                 generate_full_backup()
             case '2':
-                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
-                console.print("[bold #49CA94]===== Restaurar un respaldo completo =====[/bold #49CA94]",justify="center")
-                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
+                console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
+                console.print(f"[bold {green_medium}]===== Restaurar un respaldo completo =====[/bold {green_medium}]",justify="center")
+                console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
                 # Aquí iría la lógica para restaurar un respaldo completo
             case '3':
-                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
-                console.print("[bold #49CA94]===== Generar un respaldo de uno o varios archivos específicos =====[/bold #49CA94]",justify="center")
-                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
+                console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
+                console.print(f"[bold {green_medium}]===== Generar un respaldo de uno o varios archivos específicos =====[/bold {green_medium}]",justify="center")
+                console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
                 # Aquí iría la lógica para generar un respaldo de archivos específicos
             case '4':
-                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
-                console.print("[bold #49CA94]===== Restaurar uno o varios archivos específicos desde un respaldo =====[/bold #49CA94]",justify="center")
-                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
+                console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
+                console.print(f"[bold {green_medium}]===== Restaurar uno o varios archivos específicos desde un respaldo =====[/bold {green_medium}]",justify="center")
+                console.print(f"[bold {fg_primary}]{separator}[/bold {fg_primary}]")
                 # Aquí iría la lógica para restaurar archivos específicos desde un respaldo
             case '0':
-                console.print(f"[bold #A4ECA8]{separator}[/bold #A4ECA8]")
-                console.print("[bold #49CA94]===== Bye bye :3 =====[/bold #49CA94]",justify="center")
-                console.print(f"[bold #A4ECA8]{separator}[/bold #A4ECA8]")
+                console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
+                console.print(f"[bold {green_medium}]===== Bye bye :3 =====[/bold {green_medium}]",justify="center")
+                console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
                 break
 
 if __name__ == "__main__":
