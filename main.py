@@ -264,9 +264,20 @@ def generate_backup(sql_output: str, console: Console) -> None:
     
     # Mostramos las rutas de respaldo generadas
     console.print(f"[bold {green_medium}]Rutas de respaldo generadas:[/bold {green_medium}]")
-    dirs_table = Table(show_header=True, header_style="bold #49CA94", show_lines=True)
-    dirs_table.add_column("Ruta original", style="italic #fbf1c7")
-    dirs_table.add_column("Ruta de respaldo", style="bold #fbf1c7")
+    
+    dirs_table = Table(
+        show_header=True,
+        header_style="bold #49CA94",
+        show_lines=True)
+    dirs_table.add_column(
+        "Ruta original",
+        style="italic #fbf1c7",
+        overflow="fold")
+    dirs_table.add_column(
+        "Ruta de respaldo",
+        style="bold #fbf1c7",
+        overflow="fold")
+    
     for src, dest in backup_dirs:
         dirs_table.add_row(src, dest)
     console.print(dirs_table)
