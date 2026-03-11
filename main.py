@@ -502,7 +502,16 @@ def scan_backup_dir(backup_root: str) -> list:
                     
                     parts = dest_path.parts
                     
-                    print(f"DEBUG: parts de la ruta de respaldo: {parts}")
+                    # Validamos que la ruta de respaldo tenga la estructura necesaria para reconstruir la ruta original
+                    if len(parts) < 5:
+                        console.log(f"[yellow]Ruta de respaldo no tomada en cuenta para la restauración (no forma parte de la estructura necesaria): {dest_path}[/yellow]")
+                        continue
+                    
+                    # Validamos que la ruta de respaldo provenga de un disco de origen válido
+                    # (u01, u02, etc) y no de otro disco que no forma parte de la estructura necesaria para la restauración
+                    if not parts[2].startswith("u0"):
+                        console.log(f"[yellow]Ruta de respaldo no tomada en cuenta para la restauración (no forma parte de la estructura necesaria): {dest_path}[/yellow]")
+                        continue
                     
                     # Extraemos el disco_origen, cdb_name, categoria y nombre_archivo de la ruta de respaldo
                     disco_origen = parts[2] # Ej: 'u01'
