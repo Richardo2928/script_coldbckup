@@ -247,51 +247,7 @@ def copy_files(backup_dirs: list) -> None:
                 print(f"Error al copiar {src} a {dest}: {e}")
         else:
             print(f"Archivo no encontrado: {src}")
-            
-def scan_backup_dir(backup_root: str) -> list:
-    """
-    Escanea la ruta raíz de los respaldos y devuelve una lista de tuplas con las rutas originales y las rutas de respaldo.
-    La ruta original se reconstruye a partir de la ruta de respaldo,
-    extrayendo partes importantes: disco_origen, cdb_name, categoria y nombre_archivo
-    y lo reconstruye del siguiente modo: /{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{nombre_archivo}
-    o si está en fast_recovery_area: /{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{nombre_archivo}
-    """
-    
-    backup_dirs = list()
-    console = Console()
-    
-    with console.status("[bold {green_mint}]Escaneando directorio de respaldo...[/bold {green_mint}]", spinner="dots") as status:
-        
-        for root, dirs, files in os.walk(backup_root):
-            status.update(f"[bold {fg_secondary}]Escaneando {root}...[/bold {fg_secondary}]")
-            
-            for file in files:
-                status.update(f"[bold {fg_secondary}]Procesando {file}...[/bold {fg_secondary}]")
-                
-                # Construimos la ruta de respaldo completa
-                dest_path = Path(root) / file
-                src_path = ""
-                
-                parts = dest_path.parts
-                
-                # Extraemos el disco_origen, cdb_name, categoria y nombre_archivo de la ruta de respaldo
-                disco_origen = parts[2] # Ej: 'u01'
-                if 'fast_recovery_area' in parts:
-                    cdb_name = parts[4] # Ej: 'ORCL'
-                    categoria = parts[5] # Ej: 'datafile', 'controlfile', 'onlinelog'
-                    # Reconstruimos la ruta original
-                    src_path = f"/{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{file}"
-                else:
-                    cdb_name = parts[3] # Ej: 'ORCL'
-                    categoria = parts[4] # Ej: 'datafile', 'controlfile', 'onlinelog'
-                    # Reconstruimos la ruta original
-                    src_path = f"/{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{file}"
-                    
-                console.log(f"[bold {fg_secondary}]Ruta original reconstruida: {src_path}[/bold {fg_secondary}]")
-                
-                backup_dirs.append((src_path, str(dest_path)))
-        
-    return backup_dirs
+
             
 # ==================================================================
 # Función para generar un respaldo completo
@@ -446,7 +402,51 @@ def restore_full_backup() -> None:
     else:
         console.print(f"[bold {green_medium}]Restauración cancelada.[/bold {green_medium}]")
         return
+            
+def scan_backup_dir(backup_root: str) -> list:
+    """
+    Escanea la ruta raíz de los respaldos y devuelve una lista de tuplas con las rutas originales y las rutas de respaldo.
+    La ruta original se reconstruye a partir de la ruta de respaldo,
+    extrayendo partes importantes: disco_origen, cdb_name, categoria y nombre_archivo
+    y lo reconstruye del siguiente modo: /{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{nombre_archivo}
+    o si está en fast_recovery_area: /{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{nombre_archivo}
+    """
+    
+    backup_dirs = list()
+    console = Console()
+    
+    with console.status("[bold {green_mint}]Escaneando directorio de respaldo...[/bold {green_mint}]", spinner="dots") as status:
         
+        for root, dirs, files in os.walk(backup_root):
+            status.update(f"[bold {fg_secondary}]Escaneando {root}...[/bold {fg_secondary}]")
+            
+            for file in files:
+                status.update(f"[bold {fg_secondary}]Procesando {file}...[/bold {fg_secondary}]")
+                
+                # Construimos la ruta de respaldo completa
+                dest_path = Path(root) / file
+                src_path = ""
+                
+                parts = dest_path.parts
+                
+                # Extraemos el disco_origen, cdb_name, categoria y nombre_archivo de la ruta de respaldo
+                disco_origen = parts[2] # Ej: 'u01'
+                if 'fast_recovery_area' in parts:
+                    cdb_name = parts[4] # Ej: 'ORCL'
+                    categoria = parts[5] # Ej: 'datafile', 'controlfile', 'onlinelog'
+                    # Reconstruimos la ruta original
+                    src_path = f"/{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{file}"
+                else:
+                    cdb_name = parts[3] # Ej: 'ORCL'
+                    categoria = parts[4] # Ej: 'datafile', 'controlfile', 'onlinelog'
+                    # Reconstruimos la ruta original
+                    src_path = f"/{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{file}"
+                    
+                console.log(f"[bold {fg_secondary}]Ruta original reconstruida: {src_path}[/bold {fg_secondary}]")
+                
+                backup_dirs.append((src_path, str(dest_path)))
+        
+    return backup_dirs
 
 # ==================================================================
 # Función para pruebas
