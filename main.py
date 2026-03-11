@@ -264,8 +264,8 @@ def generate_full_backup():
             console.print("[bold #49CA94]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold #49CA94]")
             console.print(f"[italic #076678]{COMANDO_PRACTICA_7}[/italic #076678]")
             console.print("[bold #49CA94]Luego, copia y pega la salida del comando SQL aquí:[/bold #49CA94]")
-            # sql_output = sys.stdin.read()
-            sql_output = input()
+            console.print("[bold #cc241d]Presiona Ctrl+D para finalizar la entrada:[/bold #cc241d]")
+            sql_output = sys.stdin.read()
             
             # Obtener las rutas de los archivos a partir de la salida del comando SQL
             raw_paths = get_raw_paths(sql_output)
@@ -286,6 +286,7 @@ def generate_full_backup():
             console.print("[bold #49CA94]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold #49CA94]")
             console.print(f"[italic #076678]{COMANDO_PRACTICA_10}[/italic #076678]")
             console.print("[bold #49CA94]Luego, copia y pega la salida del comando SQL aquí:[/bold #49CA94]")
+            console.print("[bold #cc241d]Presiona Ctrl+D para finalizar la entrada:[/bold #cc241d]")
             sql_output = sys.stdin.read()
             
             # Obtener las rutas de los archivos a partir de la salida del comando SQL
