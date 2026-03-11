@@ -299,7 +299,8 @@ def generate_backup(sql_output: str, console: Console, practice_label: str) -> N
     for path in raw_paths:
         console.print(f"[bold {accent}]*[/bold {accent}][italic {fg_primary}]{path}[/italic {fg_primary}]")
     
-    input(f"\n[bold {accent}]Presiona Enter para continuar...[/bold {accent}]")
+    console.print(f"\n[bold {accent}]Presiona Enter para continuar...[/bold {accent}]")
+    input()
     
     # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
     backup_dirs = generate_backup_dirs_tuple(raw_paths, DEFAULT_CDB_NAME)
