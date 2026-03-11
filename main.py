@@ -236,6 +236,8 @@ def create_backup_dirs(backup_dirs: list) -> None:
         if not dest_path.parent.exists():
             print(f"Creando directorio: {dest_path.parent}")
             dest_path.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            print(f"Awebo, el directorio ya existe: {dest_path.parent}")
             
 def copy_files(backup_dirs: list) -> None:
     for src, dest in backup_dirs:
