@@ -502,6 +502,8 @@ def scan_backup_dir(backup_root: str) -> list:
                     
                     parts = dest_path.parts
                     
+                    print(f"DEBUG: parts de la ruta de respaldo: {parts}")
+                    
                     # Extraemos el disco_origen, cdb_name, categoria y nombre_archivo de la ruta de respaldo
                     disco_origen = parts[2] # Ej: 'u01'
                     if 'fast_recovery_area' in parts:
