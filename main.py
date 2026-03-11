@@ -295,7 +295,6 @@ def generate_full_backup():
             
             if choice == 'n':
                 console.print("[bold #49CA94]No pues está cañon lasjdflksjaldskjf.[/bold #49CA94]")
-                
                 return
 
             # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
