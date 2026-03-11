@@ -452,6 +452,8 @@ def restore_backup(backup_dirs: list, console: Console) -> None:
 def restore_full_backup() -> None:
     console = Console()
 
+    # Validamos que exista un registro de respaldo completo exitoso
+    # antes de proceder con la restauración, para evitar inconsistencias
     if not has_full_backup_record():
         archive_path = get_backup_archive_path()
         console.print(
@@ -460,14 +462,17 @@ def restore_full_backup() -> None:
         )
         return
     
+    # Escaneamos la ruta raíz de los respaldos
+    # para obtener las rutas originales y las rutas de respaldo
     backup_dirs = scan_backup_dir(DEFAULT_BACKUP_ROOT)
     
     console.print(f"\n[bold {green_medium}]Rutas de restauración creadas:[/bold {green_medium}]")
     
     for src, dest in backup_dirs:
-        console.print(rf"[bold {accent}]\[[/bold {accent}][italic {fg_primary}]{src}[/italic {fg_primary}][bold {accent}]]->\[[/bold {accent}][bold {fg_bright}]{dest}[/bold {fg_bright}][bold {accent}]][/bold {accent}]\n")
+        console.print(rf"[bold {accent}]\[[/bold {accent}][italic {fg_primary}]{src}[/italic {fg_primary}][bold {accent}]]->\[[/bold {accent}][bold {fg_bright}]{dest}[/bold {fg_bright}][bold {accent}]][/bold {accent}]")
     
-    choice = input(f"\n[bold {accent}]¿Deseas continuar? (y/N)[/bold {accent}] ").strip().lower()
+    console.print(f"\n[bold {accent}]¿Deseas continuar? (y/N)[/bold {accent}] ", end="")
+    choice = input().strip().lower()
     
     if choice == 'y':
         restore_backup(backup_dirs, console)
@@ -497,20 +502,20 @@ def scan_backup_dir(backup_root: str) -> list:
                     status.update(f"[bold {fg_secondary}]Procesando {file}...[/bold {fg_secondary}]")
                     
                     # Construimos la ruta de respaldo completa
-                    dest_path = Path(root) / file
-                    src_path = ""
+                    src_path = Path(root) / file
+                    dest_path = ""
                     
-                    parts = dest_path.parts
+                    parts = src_path.parts
                     
                     # Validamos que la ruta de respaldo tenga la estructura necesaria para reconstruir la ruta original
                     if len(parts) < 5:
-                        console.log(f"[yellow]Ruta de respaldo no tomada en cuenta para la restauración (no forma parte de la estructura necesaria): {dest_path}[/yellow]")
+                        console.log(f"[yellow]Ruta de respaldo no tomada en cuenta para la restauración (no forma parte de la estructura necesaria):[/yellow] {src_path}")
                         continue
                     
                     # Validamos que la ruta de respaldo provenga de un disco de origen válido
                     # (u01, u02, etc) y no de otro disco que no forma parte de la estructura necesaria para la restauración
                     if not parts[2].startswith("u0"):
-                        console.log(f"[yellow]Ruta de respaldo no tomada en cuenta para la restauración (no forma parte de la estructura necesaria): {dest_path}[/yellow]")
+                        console.log(f"[yellow]Ruta de respaldo no tomada en cuenta para la restauración (no forma parte de la estructura necesaria):[/yellow] {src_path}")
                         continue
                     
                     # Extraemos el disco_origen, cdb_name, categoria y nombre_archivo de la ruta de respaldo
@@ -519,16 +524,16 @@ def scan_backup_dir(backup_root: str) -> list:
                         cdb_name = parts[4] # Ej: 'ORCL'
                         categoria = parts[5] # Ej: 'datafile', 'controlfile', 'onlinelog'
                         # Reconstruimos la ruta original
-                        src_path = f"/{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{file}"
+                        dest_path = f"/{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{file}"
                     else:
                         cdb_name = parts[3] # Ej: 'ORCL'
                         categoria = parts[4] # Ej: 'datafile', 'controlfile', 'onlinelog'
                         # Reconstruimos la ruta original
-                        src_path = f"/{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{file}"
+                        dest_path = f"/{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{file}"
                         
-                    console.log(f"[bold {fg_secondary}]Ruta original reconstruida: {src_path}[/bold {fg_secondary}]")
+                    console.log(f"[{fg_secondary}]Ruta original reconstruida:[/{fg_secondary}] [bold]{dest_path}[/bold]")
                     
-                    backup_dirs.append((src_path, str(dest_path)))
+                    backup_dirs.append((str(src_path), dest_path))
         
     return backup_dirs
 
