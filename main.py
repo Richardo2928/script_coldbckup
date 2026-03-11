@@ -148,6 +148,7 @@ green_medium = "#49CA94"
 green_mint = "#A4ECA8"
 fg_primary = "#ebdbb2"
 fg_secondary = "#076678"
+fg_bright = "#fbf1c7"
 accent = "#d79921"
 
 # ==================================================================
@@ -263,8 +264,8 @@ def generate_backup(sql_output: str, console: Console) -> None:
     
     # Mostramos las rutas de respaldo generadas
     console.print(f"[bold {green_medium}]Rutas de respaldo generadas:[/bold {green_medium}]")
-    dirs_table = Table(show_header=True, header_style="bold #49CA94")
-    dirs_table.add_column("Ruta original", style="italic {fg_secondary}")
+    dirs_table = Table(show_header=True, header_style="bold #49CA94", show_lines=True)
+    dirs_table.add_column("Ruta original", style="italic #fbf1c7")
     dirs_table.add_column("Ruta de respaldo", style="bold #fbf1c7")
     for src, dest in backup_dirs:
         dirs_table.add_row(src, dest)
@@ -368,7 +369,7 @@ def test_script():
     
     backup_dirs = generate_backup_dirs_tuple(get_raw_paths(TEST_STRING), "ORCL")
     for src, dest in backup_dirs:
-        console.print(rf"[bold {accent}]\[[/bold {accent}][italic {fg_primary}]{src}[/italic {fg_primary}][bold {accent}]]->\[[/bold {accent}][bold #fbf1c7]{dest}[/bold #fbf1c7][bold {accent}]][/bold {accent}]")
+        console.print(rf"[bold {accent}]\[[/bold {accent}][italic {fg_primary}]{src}[/italic {fg_primary}][bold {accent}]]->\[[/bold {accent}][bold {fg_bright}]{dest}[/bold {fg_bright}][bold {accent}]][/bold {accent}]")
 
 
 # ==================================================================
