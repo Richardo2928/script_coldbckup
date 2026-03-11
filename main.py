@@ -522,7 +522,11 @@ def scan_backup_dir(backup_root: str) -> list:
                     disco_origen = parts[2] # Ej: 'u01'
                     if 'fast_recovery_area' in parts:
                         cdb_name = parts[4] # Ej: 'ORCL'
-                        categoria = parts[5] # Ej: 'datafile', 'controlfile', 'onlinelog'
+                        if parts[5] not in ['datafile', 'controlfile', 'onlinelog']:
+                            cdb_name = "ORCLPDB1" # Si la ruta de respaldo pertenece al pdb, entonces el cdb_name es ORCLPDB1
+                            categoria = cdb_name + '/' + parts[6] # Ej: 'datafile', 'controlfile', 'onlinelog'
+                        else:
+                            categoria = parts[5] # Ej: 'datafile', 'controlfile', 'onlinelog'
                         # Reconstruimos la ruta original
                         dest_path = f"/{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{file}"
                     else:
