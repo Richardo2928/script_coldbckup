@@ -505,8 +505,8 @@ def scan_backup_dir(backup_root: str) -> list:
                     src_path = Path(root) / file
                     dest_path = ""
                     
-                    parts = src_path.parts
                     
+                    parts = src_path.parts
                     # Validamos que la ruta de respaldo tenga la estructura necesaria para reconstruir la ruta original
                     if len(parts) < 5:
                         console.log(f"[yellow]Ruta de respaldo no tomada en cuenta para la restauración (no forma parte de la estructura necesaria):[/yellow] {src_path}")
@@ -518,22 +518,24 @@ def scan_backup_dir(backup_root: str) -> list:
                         console.log(f"[yellow]Ruta de respaldo no tomada en cuenta para la restauración (no forma parte de la estructura necesaria):[/yellow] {src_path}")
                         continue
                     
-                    # Extraemos el disco_origen, cdb_name, categoria y nombre_archivo de la ruta de respaldo
+                    # Sacamos la categorría del archivo a partir del nombre del padre inmediato,
+                    categoria = src_path.parent.name # Ej: 'datafile', 'controlfile', 'onlinelog' o 'ORCLPDB1' si pertenece al pdb
+                    
+                    # Si el segundo padre no es el cdb, entonces los archivos pertenecen a un pdb
+                    if src_path.parent.parent.name != DEFAULT_CDB_NAME:
+                        categoria = src_path.parent.parent.name + '/' + categoria # Ej: 'ORCL/datafile', 'ORCL/controlfile', 'ORCL/onlinelog'
+                    
+                    # Extraemos el disco_origen, cdb_name
                     disco_origen = parts[2] # Ej: 'u01'
+                    
+                    # Extraemos nombre del archivo
+                    nombre_archivo = file # Ej: 'o1_mf_system_nrqv4ytd_.dbf'
+                    
+                    # Reconstruimos la ruta según si es de oradata o del fast_recovery_area
                     if 'fast_recovery_area' in parts:
-                        cdb_name = parts[4] # Ej: 'ORCL'
-                        if parts[5] not in ['datafile', 'controlfile', 'onlinelog']:
-                            cdb_name = "ORCLPDB1" # Si la ruta de respaldo pertenece al pdb, entonces el cdb_name es ORCLPDB1
-                            categoria = cdb_name + '/' + parts[6] # Ej: 'datafile', 'controlfile', 'onlinelog'
-                        else:
-                            categoria = parts[5] # Ej: 'datafile', 'controlfile', 'onlinelog'
-                        # Reconstruimos la ruta original
-                        dest_path = f"/{disco_origen}/app/oracle/fast_recovery_area/{cdb_name}/{categoria}/{file}"
+                        dest_path = f"/{disco_origen}/app/oracle/fast_recovery_area/{DEFAULT_CDB_NAME}/{categoria}/{nombre_archivo}"
                     else:
-                        cdb_name = parts[3] # Ej: 'ORCL'
-                        categoria = parts[4] # Ej: 'datafile', 'controlfile', 'onlinelog'
-                        # Reconstruimos la ruta original
-                        dest_path = f"/{disco_origen}/app/oracle/oradata/{cdb_name}/{categoria}/{file}"
+                        dest_path = f"/{disco_origen}/app/oracle/oradata/{DEFAULT_CDB_NAME}/{categoria}/{nombre_archivo}"
                         
                     console.log(f"[{fg_secondary}]Ruta original reconstruida:[/{fg_secondary}] [bold]{dest_path}[/bold]")
                     
