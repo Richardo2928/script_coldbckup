@@ -242,7 +242,59 @@ def copy_files(backup_dirs: list) -> None:
 # ==================================================================
 # Función para generar un respaldo completo
 # ==================================================================
-def generate_full_backup():
+# Esta función se encarga de generar un respaldo completo, específicamente para la práctica 7
+def generate_backup(sql_output: str, console: Console) -> None:
+    
+    # Obtener las rutas de los archivos a partir de la salida del comando SQL
+    raw_paths = get_raw_paths(sql_output)
+    console.print("[bold #49CA94]Rutas originales extraídas del SQL:[/bold #49CA94]")
+    for path in raw_paths:
+        console.print(f"[bold #d79921]*[/bold #d79921][italic #076678]{path}[/italic #076678]")
+    
+    # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
+    backup_dirs = generate_backup_dirs_tuple(raw_paths, DEFAULT_CDB_NAME)
+    
+    # Mostramos las rutas de respaldo generadas
+    console.print("[bold #49CA94]Rutas de respaldo generadas:[/bold #49CA94]")
+    for src, dest in backup_dirs:
+        console.print(rf"[bold #d79921]\[[/bold #d79921][italic #ebdbb2]{src}[/italic #ebdbb2][bold #d79921]]->\[[/bold #d79921][bold #fbf1c7]{dest}[/bold #fbf1c7][bold #d79921]][/bold #d79921]")
+    
+    # Validamos con el usuario que las rutas de respaldo generadas son correctas, para evitar errores al momento de copiar los archivos
+    console.print("[bold #49CA94]Te parece que las rutas de respaldo generadas son correctas?[/bold #49CA94]")
+    console.print("[bold #d79921](y/N)[/bold #d79921]")
+    
+    while True:
+        console.print("[bold #d79921]>> [/bold #d79921]", end="")
+        choice = str(input().strip()).lower()
+        if choice == 'y':
+            break
+        else:
+            console.print("[bold #d79921]Opción no válida. Por favor, ingresa y o n.[/bold #d79921]")
+    
+    if choice == 'n':
+        console.print("[bold #49CA94]No pues está cañon lasjdflksjaldskjf.[/bold #49CA94]")
+        return
+
+    # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
+    with console.status("[bold green]Preparando respaldo...[/bold green]", spinner="dots") as status:
+        status.update("[bold cyan]Creando directorios de destino...[/bold cyan]")
+        create_backup_dirs(backup_dirs)
+
+        status.update("[bold cyan]Copiando archivos...[/bold cyan]")
+        for i, (src, dest) in enumerate(backup_dirs, start=1):
+            status.update(f"[bold cyan]Copiando {i}/{len(backup_dirs)}[/bold cyan]")
+            src_path = Path(src)
+            dest_path = Path(dest)
+            if src_path.exists():
+                shutil.copy2(src_path, dest_path)
+                console.log(f"[green]Copiado[/green] {src} -> {dest}")
+            else:
+                console.log(f"[yellow]No existe[/yellow] {src}")
+
+    console.log("[bold red]Done![/bold red]")
+
+# Generar un respaldo completo, ya sea de la práctica 7 o de la práctica 10
+def generate_full_backup() -> None:
     console = Console()
     
     console.print("[bold #49CA94]Qué practica estás realizando?[/bold #49CA94]")
@@ -259,6 +311,7 @@ def generate_full_backup():
             console.print("[bold #d79921]Opción no válida. Por favor, ingresa 1 o 2.[/bold #d79921]")
     
     # Procesar la elección del usuario
+    sql_output = ""
     match choice:
         case '1':
             console.print("[bold #49CA94]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold #49CA94]")
@@ -266,54 +319,6 @@ def generate_full_backup():
             console.print("[bold #49CA94]Luego, copia y pega la salida del comando SQL aquí:[/bold #49CA94]")
             console.print("[bold #cc241d]Presiona Ctrl+D para finalizar la entrada:[/bold #cc241d]")
             sql_output = sys.stdin.read()
-            
-            # Obtener las rutas de los archivos a partir de la salida del comando SQL
-            raw_paths = get_raw_paths(sql_output)
-            console.print("[bold #49CA94]Rutas originales extraídas del SQL:[/bold #49CA94]")
-            for path in raw_paths:
-                console.print(f"[bold #d79921]*[/bold #d79921][italic #076678]{path}[/italic #076678]")
-            
-            # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
-            backup_dirs = generate_backup_dirs_tuple(raw_paths, DEFAULT_CDB_NAME)
-            
-            # Mostramos las rutas de respaldo generadas
-            console.print("[bold #49CA94]Rutas de respaldo generadas:[/bold #49CA94]")
-            for src, dest in backup_dirs:
-                console.print(rf"[bold #d79921]\[[/bold #d79921][italic #ebdbb2]{src}[/italic #ebdbb2][bold #d79921]]->\[[/bold #d79921][bold #fbf1c7]{dest}[/bold #fbf1c7][bold #d79921]][/bold #d79921]")
-            
-            # Validamos con el usuario que las rutas de respaldo generadas son correctas, para evitar errores al momento de copiar los archivos
-            console.print("[bold #49CA94]Te parece que las rutas de respaldo generadas son correctas?[/bold #49CA94]")
-            console.print("[bold #d79921](y/N)[/bold #d79921]")
-            
-            while True:
-                console.print("[bold #d79921]>> [/bold #d79921]", end="")
-                choice = input().strip()
-                if choice.lower() == 'y':
-                    break
-                else:
-                    console.print("[bold #d79921]Opción no válida. Por favor, ingresa y o n.[/bold #d79921]")
-            
-            if choice == 'n':
-                console.print("[bold #49CA94]No pues está cañon lasjdflksjaldskjf.[/bold #49CA94]")
-                return
-
-            # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
-            with console.status("[bold green]Preparando respaldo...[/bold green]", spinner="dots") as status:
-                status.update("[bold cyan]Creando directorios de destino...[/bold cyan]")
-                create_backup_dirs(backup_dirs)
-
-                status.update("[bold cyan]Copiando archivos...[/bold cyan]")
-                for i, (src, dest) in enumerate(backup_dirs, start=1):
-                    status.update(f"[bold cyan]Copiando {i}/{len(backup_dirs)}[/bold cyan]")
-                    src_path = Path(src)
-                    dest_path = Path(dest)
-                    if src_path.exists():
-                        shutil.copy2(src_path, dest_path)
-                        console.log(f"[green]Copiado[/green] {src} -> {dest}")
-                    else:
-                        console.log(f"[yellow]No existe[/yellow] {src}")
-
-            console.log("[bold red]Done![/bold red]")
         case '2':
             console.print("[bold #49CA94]Ejecuta el siguiente comando SQL para obtener las rutas de los archivos:[/bold #49CA94]")
             console.print(f"[italic #076678]{COMANDO_PRACTICA_10}[/italic #076678]")
@@ -321,21 +326,7 @@ def generate_full_backup():
             console.print("[bold #cc241d]Presiona Ctrl+D para finalizar la entrada:[/bold #cc241d]")
             sql_output = sys.stdin.read()
             
-            # Obtener las rutas de los archivos a partir de la salida del comando SQL
-            raw_paths = get_raw_paths(sql_output)
-            console.print("[bold #49CA94]Rutas originales extraídas del SQL:[/bold #49CA94]")
-            for path in raw_paths:
-                console.print(f"[bold #d79921]*[/bold #d79921][italic #076678]{path}[/italic #076678]")
-            
-            # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
-            backup_dirs = generate_backup_dirs_tuple(raw_paths, DEFAULT_CDB_NAME)
-            console.print("[bold #49CA94]Rutas de respaldo generadas:[/bold #49CA94]")
-            for src, dest in backup_dirs:
-                console.print(rf"[bold #d79921]\[[/bold #d79921][italic #ebdbb2]{src}[/italic #ebdbb2][bold #d79921]]->\[[/bold #d79921][bold #fbf1c7]{dest}[/bold #fbf1c7][bold #d79921]][/bold #d79921]")
-            
-            # Creamos los directorios de respaldo y copiamos los archivos a las rutas de respaldo
-            create_backup_dirs(backup_dirs)
-            copy_files(backup_dirs)
+    generate_backup(sql_output, console)
     
 
 # ==================================================================
@@ -374,6 +365,9 @@ def test_script():
 # ==================================================================
 def main():
     console = Console()
+    console_width = console.width
+    console.height = console.height
+    separator = "=" * console_width
     
     while True:
         console.print("[bold #ebdbb2]Qué deseas hacer?[/bold #ebdbb2]")
@@ -395,19 +389,29 @@ def main():
         # Procesar la elección del usuario
         match choice:
             case '1':
+                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
                 console.print("[bold #49CA94]===== Generar un respaldo completo =====[/bold #49CA94]",justify="center")
+                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
                 generate_full_backup()
             case '2':
+                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
                 console.print("[bold #49CA94]===== Restaurar un respaldo completo =====[/bold #49CA94]",justify="center")
+                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
                 # Aquí iría la lógica para restaurar un respaldo completo
             case '3':
+                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
                 console.print("[bold #49CA94]===== Generar un respaldo de uno o varios archivos específicos =====[/bold #49CA94]",justify="center")
+                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
                 # Aquí iría la lógica para generar un respaldo de archivos específicos
             case '4':
+                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
                 console.print("[bold #49CA94]===== Restaurar uno o varios archivos específicos desde un respaldo =====[/bold #49CA94]",justify="center")
+                console.print(f"[bold #ebdbb2]{separator}[/bold #ebdbb2]")
                 # Aquí iría la lógica para restaurar archivos específicos desde un respaldo
             case '0':
+                console.print(f"[bold #A4ECA8]{separator}[/bold #A4ECA8]")
                 console.print("[bold #49CA94]===== Bye bye :3 =====[/bold #49CA94]",justify="center")
+                console.print(f"[bold #A4ECA8]{separator}[/bold #A4ECA8]")
                 break
 
 if __name__ == "__main__":
