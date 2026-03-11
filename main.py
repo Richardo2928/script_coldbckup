@@ -268,7 +268,10 @@ def register_full_backup(console: Console, practice_label: str, total_files: int
     with archive_path.open("a", encoding="utf-8") as archive_file:
         archive_file.write(log_line)
 
-    console.log(f"[{green_mint}]Registro actualizado[/{green_mint}] {archive_path}")
+    console.print(f"[{green_mint}]===== Registro actualizado =====[/{green_mint}] {archive_path}")
+    console.print(f"{log_line.strip()}")
+    console.print(f"[{green_mint}]===============================[/{green_mint}]")
+    
 
 
 def has_full_backup_record() -> bool:
@@ -295,18 +298,18 @@ def generate_backup(sql_output: str, console: Console, practice_label: str) -> N
     # Obtener las rutas de los archivos a partir de la salida del comando SQL
     raw_paths = get_raw_paths(sql_output)
     
-    console.print(f"\n[bold {green_medium}]Rutas originales extraídas del SQL:[/bold {green_medium}]")
+    console.print(f"\n[bold {green_medium}]===== Rutas originales extraídas del SQL =====[/bold {green_medium}]", justify="center")
     for path in raw_paths:
         console.print(f"[bold {accent}]*[/bold {accent}][italic {fg_primary}]{path}[/italic {fg_primary}]")
     
-    console.print(f"\n[bold {accent}]Presiona Enter para continuar...[/bold {accent}]")
+    console.print(f"\n[bold {accent}]Presiona Enter para continuar...[/bold {accent}]", justify="center")
     input()
     
     # Generamos las rutas de respaldo a partir de las rutas originales extraídas de la salida del SQL
     backup_dirs = generate_backup_dirs_tuple(raw_paths, DEFAULT_CDB_NAME)
     
     # Mostramos las rutas de respaldo generadas
-    console.print(f"\n[bold {green_medium}]Rutas de respaldo generadas:[/bold {green_medium}]")
+    console.print(f"\n[bold {green_medium}]===== Rutas de respaldo generadas =====[/bold {green_medium}]", justify="center")
     
     dirs_table = Table(
         show_header=True,
@@ -348,10 +351,10 @@ def generate_backup(sql_output: str, console: Console, practice_label: str) -> N
     error_count = 0
 
     with console.status(f"[bold {green_mint}]Preparando respaldo...[/bold {green_mint}]", spinner="dots") as status:
-        status.update(f"[bold {fg_secondary}]Creando directorios de destino...[/bold {fg_secondary}]")
+        console.print(f"[bold {fg_secondary}]----- Creando directorios de destino -----[/bold {fg_secondary}]", justify="center")
         create_backup_dirs(backup_dirs)
 
-        status.update(f"[bold {fg_secondary}]Copiando archivos...[/bold {fg_secondary}]")
+        console.print(f"[bold {fg_secondary}]----- Copiando archivos -----[/bold {fg_secondary}]", justify="center")
         for i, (src, dest) in enumerate(backup_dirs, start=1):
             status.update(f"[bold {fg_secondary}]Copiando {i}/{len(backup_dirs)}[/bold {fg_secondary}]")
             src_path = Path(src)
