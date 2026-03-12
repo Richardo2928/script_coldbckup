@@ -591,6 +591,10 @@ def main():
     console.print(f"[bold {green_mint}]{separator}[/bold {green_mint}]")
     
     while True:
+        console.print(f"[bold {fg_bright}]{separator}[/bold {fg_bright}]")
+        console.print(f"[bold {fg_primary}]CDB Name: [/bold {fg_primary}][italic {fg_secondary}]{DEFAULT_CDB_NAME}[/italic {fg_secondary}] || [bold {fg_primary}]Default backup root: [/bold {fg_primary}][italic {fg_secondary}]{DEFAULT_BACKUP_ROOT}[/italic {fg_secondary}]",justify="center")
+        console.print(f"[bold {fg_bright}]{separator}[/bold {fg_bright}]")
+        
         console.print(f"[bold {fg_primary}]Qué deseas hacer?[/bold {fg_primary}]")
         console.print(f"[bold {accent}]1.[/bold {accent}] Generar un respaldo")
         console.print(f"[bold {accent}]2.[/bold {accent}] Restaurar un respaldo")
