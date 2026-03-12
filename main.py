@@ -172,7 +172,7 @@ def get_raw_paths(sql_output: str) -> list:
      """
     
     # Patrón regex para extraer las rutas de los archivos
-    pattern = r"/u0\d[\w/\n\-]+?\.(?:dbf|ctl|log)"
+    pattern = r"/u0\d[\w/\n\-]+?\.(?:dbf|ctl|log|arc)"
     
     # Usamos re.findall para extraer todas las rutas que coincidan con el patrón
     raw_paths = re.findall(pattern, sql_output)
