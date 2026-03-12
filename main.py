@@ -94,7 +94,7 @@ SELECT name FROM v$controlfile
 UNION ALL
 SELECT member FROM v$logfile
 UNION ALL
-SELECT name FROM v$archived_log;
+SELECT name FROM v$archived_log WHERE deleted = 'NO';
 """
 
 TEST_STRING = """
